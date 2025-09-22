@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مخطط الميزانية الشهرية - تطبيق متكامل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #fca311;
+            --info: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --bg-gradient: linear-gradient(120deg, #4361ee 0%, #3a0ca3 100%);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --hover-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Tajawal', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* الشريط الجانبي */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-gradient);
+            color: white;
+            padding: 25px 20px;
+            box-shadow: var(--card-shadow);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo-icon {
+            font-size: 28px;
+            margin-left: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .nav-links {
+            list-style: none;
+            margin-top: 30px;
+        }
+        
+        .nav-links li {
+            margin-bottom: 12px;
+        }
+        
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+        
+        .nav-links i {
+            margin-left: 12px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 20px 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+        
+        .developer-info {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .developer-name {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .developer-name i {
+            margin-left: 8px;
+            color: #4cc9f0;
+        }
+        
+        .developer-links {
+            margin-top: 10px;
+        }
+        
+        .profile-link {
+            display: inline-flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+        
+        .profile-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .profile-link i {
+            margin-left: 5px;
+            font-size: 12px;
+        }
+        
+        .copyright {
+            text-align: center;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .copyright p {
+            margin: 5px 0;
+        }
+        
+        /* المحتوى الرئيسي */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+        
+        .notification-btn {
+            background: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            box-shadow: var(--card-shadow);
+            color: var(--gray);
+            position: relative;
+        }
+        
+        .notification-dot {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 10px;
+            height: 10px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 25px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        /* البطاقات والإحصائيات */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+        
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .budget-icon {
+            background: rgba(67, 97, 238, 0.15);
+            color: var(--primary);
+        }
+        
+        .expense-icon {
+            background: rgba(247, 37, 133, 0.15);
+            color: var(--danger);
+        }
+        
+        .savings-icon {
+            background: rgba(76, 201, 240, 0.15);
+            color: var(--success);
+        }
+        
+        .stat-title {
+            font-size: 16px;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .stat-change {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .change-up {
+            color: var(--success);
+        }
+        
+        .change-down {
+            color: var(--danger);
+        }
+        
+        /* المحتوى الرئيسي */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .card-actions {
+            display: flex;
+        }
+        
+        .card-action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--light);
+            color: var(--gray);
+            margin-right: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .card-action-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* النموذج */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+            outline: none;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-block {
+            width: 100%;
+        }
+        
+        /* قائمة المصروفات */
+        .expenses-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .expense-item:last-child {
+            border-bottom: none;
+        }
+        
+        .expense-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .expense-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-size: 20px;
+        }
+        
+        .expense-details {
+            flex: 1;
+        }
+        
+        .expense-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .expense-description {
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .expense-amount {
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .category-food { background: rgba(247, 37, 133, 0.15); color: var(--danger); }
+        .category-bills { background: rgba(67, 97, 238, 0.15); color: var(--primary); }
+        .category-transport { background: rgba(252, 163, 17, 0.15); color: var(--warning); }
+        .category-entertainment { background: rgba(114, 9, 183, 0.15); color: var(--info); }
+        .category-shopping { background: rgba(76, 201, 240, 0.15); color: var(--success); }
+        .category-other { background: rgba(108, 117, 125, 0.15); color: var(--gray); }
+        
+        /* الرسم البياني */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+        
+        /* التبويبات */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* الإشعارات */
+        .notification-toast {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            right: 30px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.5s;
+        }
+        
+        .notification-toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-size: 20px;
+        }
+        
+        .notification-success {
+            background: rgba(76, 201, 240, 0.15);
+            color: var(--success);
+        }
+        
+        .notification-error {
+            background: rgba(247, 37, 133, 0.15);
+            color: var(--danger);
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        /* التكيف مع الشاشات الصغيرة */
+        @media (max-width: 992px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 15px;
+            }
+            
+            .nav-links {
+                display: flex;
+                overflow-x: auto;
+                margin-top: 20px;
+            }
+            
+            .nav-links li {
+                margin-bottom: 0;
+                margin-left: 10px;
+            }
+            
+            .nav-links a {
+                padding: 10px 15px;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .user-menu {
+                margin-top: 15px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- الشريط الجانبي -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div class="logo-text">ميزانيتي</div>
+            </div>
+            
+            <ul class="nav-links">
+                <li><a href="#" class="active"><i class="fas fa-home"></i> الرئيسية</a></li>
+                <li><a href="#"><i class="fas fa-chart-bar"></i> التقارير</a></li>
+                <li><a href="#"><i class="fas fa-wallet"></i> الميزانية</a></li>
+                <li><a href="#"><i class="fas fa-receipt"></i> المصروفات</a></li>
+                <li><a href="#"><i class="fas fa-chart-line"></i> الإحصائيات</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> الإعدادات</a></li>
+            </ul>
+            
+            <!-- التذييل المحسن -->
+            <div class="sidebar-footer">
+                <div class="developer-info">
+                    <div class="developer-name">
+                        <i class="fas fa-code"></i>
+                        مطور الويب: محمد فرحان
+                    </div>
+                    <div class="developer-links">
+                        <a href=" https://mostaql.com/u/Mohammed_22a/portfolio"arget="_blank" class="profile-link">
+                            <i class="fas fa-external-link-alt"></i>
+                            معرض أعمالي على مستقل
+                        </a>
+                    </div>
+                </div>
+                <div class="copyright">
+                    <p>تم التطوير بدقة واحترافية</p>
+                    <p>جميع الحقوق محفوظة &copy; <span id="current-year">2023</span></p>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- المحتوى الرئيسي -->
+        <main class="main-content">
+            <div class="header">
+                <h1 class="page-title">لوحة تحكم الميزانية</h1>
+                <div class="user-menu">
+                    <div class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-dot"></span>
+                    </div>
+                    <div class="user-profile">
+                        <div class="user-avatar">م</div>
+                        <div class="user-info">
+                            <div class="user-name">مهندس البرمجيات</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- إحصائيات سريعة -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-title">الميزانية الشهرية</div>
+                            <div class="stat-value" id="total-budget">0 ر.س</div>
+                        </div>
+                        <div class="stat-icon budget-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                    </div>
+                    <div class="stat-change change-up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>محددة لهذا الشهر</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-title">إجمالي المصروفات</div>
+                            <div class="stat-value" id="total-expenses">0 ر.س</div>
+                        </div>
+                        <div class="stat-icon expense-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                    </div>
+                    <div class="stat-change change-down">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>من الميزانية المتبقية</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-title">المبلغ المتبقي</div>
+                            <div class="stat-value" id="remaining-budget">0 ر.س</div>
+                        </div>
+                        <div class="stat-icon savings-icon">
+                            <i class="fas fa-piggy-bank"></i>
+                        </div>
+                    </div>
+                    <div class="stat-change change-up">
+                        <i class="fas fa-arrow-down"></i>
+                        <span>متاح للإنفاق</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- المحتوى الرئيسي -->
+            <div class="content-grid">
+                <!-- بطاقة إضافة الميزانية والمصروفات -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">إدارة الميزانية</h2>
+                        <div class="card-actions">
+                            <div class="card-action-btn">
+                                <i class="fas fa-sync"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tabs">
+                        <div class="tab active" data-tab="budget">الميزانية</div>
+                        <div class="tab" data-tab="expense">إضافة مصروف</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="budget-tab">
+                        <div class="form-group">
+                            <label class="form-label">الميزانية الشهرية (ريال سعودي)</label>
+                            <input type="number" class="form-control" id="budget" placeholder="أدخل الميزانية المتوفرة">
+                        </div>
+                        <button class="btn btn-primary btn-block" id="set-budget">
+                            <i class="fas fa-check-circle"></i> تعيين الميزانية
+                        </button>
+                    </div>
+                    
+                    <div class="tab-content" id="expense-tab">
+                        <div class="form-group">
+                            <label class="form-label">المبلغ (ريال سعودي)</label>
+                            <input type="number" class="form-control" id="expense-amount" placeholder="أدخل المبلغ">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">التصنيف</label>
+                            <select class="form-control" id="expense-category">
+                                <option value="food">🍕 طعام</option>
+                                <option value="bills">💡 فواتير</option>
+                                <option value="transport">🚗 مواصلات</option>
+                                <option value="entertainment">🎬 تسلية</option>
+                                <option value="shopping">🛒 تسوق</option>
+                                <option value="other">📦 أخرى</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">الوصف (اختياري)</label>
+                            <input type="text" class="form-control" id="expense-description" placeholder="وصف المصروف">
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block" id="add-expense">
+                            <i class="fas fa-plus-circle"></i> إضافة المصروف
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- بطاقة المصروفات -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">المصروفات الأخيرة</h2>
+                        <div class="card-actions">
+                            <div class="card-action-btn">
+                                <i class="fas fa-filter"></i>
+                            </div>
+                            <div class="card-action-btn">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="expenses-list" id="expenses-list">
+                        <p id="no-expenses" style="text-align: center; padding: 20px; color: var(--gray);">
+                            لا توجد مصروفات مسجلة بعد.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- بطاقة الإحصائيات والرسوم البيانية -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">تحليل المصروفات</h2>
+                    <div class="card-actions">
+                        <div class="card-action-btn">
+                            <i class="fas fa-download"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- إشعار -->
+    <div class="notification-toast" id="notification">
+        <div class="notification-icon" id="notification-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <div class="notification-content">
+            <div id="notification-message">تمت العملية بنجاح</div>
+        </div>
+        <button class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // عناصر DOM
+            const budgetInput = document.getElementById('budget');
+            const setBudgetBtn = document.getElementById('set-budget');
+            const expenseAmount = document.getElementById('expense-amount');
+            const expenseCategory = document.getElementById('expense-category');
+            const expenseDescription = document.getElementById('expense-description');
+            const addExpenseBtn = document.getElementById('add-expense');
+            const expensesList = document.getElementById('expenses-list');
+            const noExpenses = document.getElementById('no-expenses');
+            const totalBudgetEl = document.getElementById('total-budget');
+            const totalExpensesEl = document.getElementById('total-expenses');
+            const remainingBudgetEl = document.getElementById('remaining-budget');
+            const notification = document.getElementById('notification');
+            const notificationIcon = document.getElementById('notification-icon');
+            const notificationMessage = document.getElementById('notification-message');
+            
+            // بيانات التطبيق
+            let budget = 0;
+            let expenses = [];
+            let totalExpenses = 0;
+            let expenseChart = null;
+            
+            // إضافة السنة الحالية تلقائياً
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            
+            // تهيئة الرسوم البيانية
+            function initChart() {
+                const ctx = document.getElementById('expenseChart').getContext('2d');
+                
+                // بيانات المخطط (سيتم تحديثها لاحقاً)
+                const data = {
+                    labels: ['طعام', 'فواتير', 'مواصلات', 'تسلية', 'تسوق', 'أخرى'],
+                    datasets: [{
+                        label: 'المصروفات حسب التصنيف',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: [
+                            'rgba(247, 37, 133, 0.7)',
+                            'rgba(67, 97, 238, 0.7)',
+                            'rgba(252, 163, 17, 0.7)',
+                            'rgba(114, 9, 183, 0.7)',
+                            'rgba(76, 201, 240, 0.7)',
+                            'rgba(108, 117, 125, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(247, 37, 133)',
+                            'rgb(67, 97, 238)',
+                            'rgb(252, 163, 17)',
+                            'rgb(114, 9, 183)',
+                            'rgb(76, 201, 240)',
+                            'rgb(108, 117, 125)'
+                        ],
+                        borderWidth: 1
+                    }]
+                };
+                
+                // خيارات المخطط
+                const options = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            rtl: true,
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    family: 'Tajawal, sans-serif',
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            rtl: true,
+                            titleFont: {
+                                family: 'Tajawal, sans-serif'
+                            },
+                            bodyFont: {
+                                family: 'Tajawal, sans-serif'
+                            },
+                            footerFont: {
+                                family: 'Tajawal, sans-serif'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + ' ر.س';
+                                }
+                            }
+                        }
+                    }
+                };
+                
+                // إنشاء المخطط
+                expenseChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: options
+                });
+            }
+            
+            // تحديث الرسم البياني
+            function updateChart() {
+                if (!expenseChart) return;
+                
+                // حساب المجموع لكل فئة
+                const categories = ['food', 'bills', 'transport', 'entertainment', 'shopping', 'other'];
+                const amounts = [0, 0, 0, 0, 0, 0];
+                
+                expenses.forEach(expense => {
+                    const index = categories.indexOf(expense.category);
+                    if (index !== -1) {
+                        amounts[index] += expense.amount;
+                    }
+                });
+                
+                // تحديث بيانات المخطط
+                expenseChart.data.datasets[0].data = amounts;
+                expenseChart.update();
+            }
+            
+            // التبويبات
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // إلغاء تنشيط جميع التبويبات والمحتويات
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    
+                    // تنشيط التبويب والمحتوى المحدد
+                    tab.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // تعيين الميزانية
+            setBudgetBtn.addEventListener('click', function() {
+                const budgetValue = parseFloat(budgetInput.value);
+                
+                if (budgetValue && budgetValue > 0) {
+                    budget = budgetValue;
+                    updateSummary();
+                    budgetInput.disabled = true;
+                    setBudgetBtn.disabled = true;
+                    showNotification('تم تعيين الميزانية بنجاح!', 'success');
+                } else {
+                    showNotification('يرجى إدخال ميزانية صحيحة أكبر من الصفر', 'error');
+                }
+            });
+            
+            // إضافة مصروف جديد
+            addExpenseBtn.addEventListener('click', function() {
+                if (budget === 0) {
+                    showNotification('يرجى تعيين الميزانية أولاً', 'error');
+                    return;
+                }
+                
+                const amount = parseFloat(expenseAmount.value);
+                const category = expenseCategory.value;
+                const description = expenseDescription.value || 'بدون وصف';
+                
+                if (amount && amount > 0) {
+                    // التحقق من عدم تجاوز الميزانية
+                    if (totalExpenses + amount > budget) {
+                        showNotification('هذا المصروف يتجاوز الميزانية المتبقية!', 'error');
+                        return;
+                    }
+                    
+                    // إضافة المصروف إلى القائمة
+                    expenses.push({
+                        amount,
+                        category,
+                        description
+                    });
+                    
+                    // تحديث الواجهة
+                    renderExpenses();
+                    updateSummary();
+                    updateChart();
+                    
+                    // مسح الحقول
+                    expenseAmount.value = '';
+                    expenseDescription.value = '';
+                    
+                    showNotification('تم إضافة المصروف بنجاح!', 'success');
+                } else {
+                    showNotification('يرجى إدخال مبلغ صحيح للمصروف', 'error');
+                }
+            });
+            
+            // عرض المصروفات
+            function renderExpenses() {
+                if (expenses.length === 0) {
+                    noExpenses.style.display = 'block';
+                    expensesList.innerHTML = '';
+                    expensesList.appendChild(noExpenses);
+                    return;
+                }
+                
+                noExpenses.style.display = 'none';
+                expensesList.innerHTML = '';
+                
+                expenses.forEach((expense, index) => {
+                    const expenseItem = document.createElement('div');
+                    expenseItem.className = 'expense-item';
+                    
+                    const categoryNames = {
+                        'food': 'طعام',
+                        'bills': 'فواتير',
+                        'transport': 'مواصلات',
+                        'entertainment': 'تسلية',
+                        'shopping': 'تسوق',
+                        'other': 'أخرى'
+                    };
+                    
+                    const categoryIcons = {
+                        'food': 'fa-utensils',
+                        'bills': 'fa-bolt',
+                        'transport': 'fa-car',
+                        'entertainment': 'fa-film',
+                        'shopping': 'fa-shopping-cart',
+                        'other': 'fa-box'
+                    };
+                    
+                    expenseItem.innerHTML = `
+                        <div class="expense-info">
+                            <div class="expense-icon category-${expense.category}">
+                                <i class="fas ${categoryIcons[expense.category]}"></i>
+                            </div>
+                            <div class="expense-details">
+                                <div class="expense-title">${categoryNames[expense.category]}</div>
+                                <div class="expense-description">${expense.description}</div>
+                            </div>
+                        </div>
+                        <div class="expense-amount">${expense.amount.toLocaleString()} ر.س</div>
+                    `;
+                    
+                    expensesList.appendChild(expenseItem);
+                });
+            }
+            
+            // تحديث الملخص
+            function updateSummary() {
+                totalExpenses = expenses.reduce((total, expense) => total + expense.amount, 0);
+                const remaining = budget - totalExpenses;
+                
+                totalBudgetEl.textContent = `${budget.toLocaleString()} ر.س`;
+                totalExpensesEl.textContent = `${totalExpenses.toLocaleString()} ر.س`;
+                remainingBudgetEl.textContent = `${remaining.toLocaleString()} ر.س`;
+                
+                // تغيير لون المتبقي إذا كان سالباً
+                if (remaining < 0) {
+                    remainingBudgetEl.parentElement.parentElement.style.background = 'linear-gradient(135deg, #f8f9fa 0%, #fff5f7 100%)';
+                    remainingBudgetEl.style.color = 'var(--danger)';
+                } else {
+                    remainingBudgetEl.parentElement.parentElement.style.background = 'white';
+                    remainingBudgetEl.style.color = 'inherit';
+                }
+            }
+            
+            // عرض الإشعارات
+            function showNotification(message, type) {
+                // تحديث رسالة ونوع الإشعار
+                notificationMessage.textContent = message;
+                
+                if (type === 'success') {
+                    notificationIcon.className = 'notification-icon notification-success';
+                    notificationIcon.innerHTML = '<i class="fas fa-check"></i>';
+                } else {
+                    notificationIcon.className = 'notification-icon notification-error';
+                    notificationIcon.innerHTML = '<i class="fas fa-exclamation"></i>';
+                }
+                
+                // عرض الإشعار
+                notification.classList.add('show');
+                
+                // إخفاء الإشعار بعد 3 ثوان
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            // إغلاق الإشعار
+            document.querySelector('.notification-close').addEventListener('click', function() {
+                notification.classList.remove('show');
+            });
+            
+            // التهيئة الأولية
+            initChart();
+            renderExpenses();
+            updateSummary();
+        });
+    </script>
+</body>
+</html>
